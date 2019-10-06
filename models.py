@@ -48,7 +48,8 @@ class Model(object):
 
     def fit(self, train_data, target_data, valid_data=None):
         '''
-        Fit a seq2seq model on pairs of sequences of source and target language.
+        Fit a seq2seq model on pairs of sequences of source and target
+        languages.
 
         Arguments
         ---------
@@ -171,11 +172,10 @@ class Model(object):
             best_seqs = [all_seq[indi] for indi in ind]
             best_probas = [all_proba[indi] for indi in ind]
             len_tr += 1
-
+            # Append the best first sentence that ends with EOS token
             while best_seqs[0][-1] == eos_token and len(best_seqs[0]) > 0 \
                   and len(to_keep) < nb_translations:
                 to_keep.append((best_probas.pop(0), best_seqs.pop(0)))
-
         # Keep the best ones
         translations = []
         for k, (p, translation) in \
@@ -372,6 +372,7 @@ class Transformer(Model):
         self.causality = causality
         self.pos_enc = pos_enc
         self.nb_heads = nb_heads
+        self.model_name = 'transformer'
         self._build()
         self._compute_loss()
         self._define_optimizer()
@@ -510,9 +511,9 @@ class RNN(Model):
         last_h = []
         for k in range(self.nb_layers):
             encoder = self.rnn_layer(input_size=self.hidden_size,
-                                       hidden_size=self.hidden_size,
-                                       init=self.c_t,
-                                       dtype=self.dtype)(h_t=encoder)
+                                     hidden_size=self.hidden_size,
+                                     init=self.c_t,
+                                     dtype=self.dtype)(h_t=encoder)
             encoder = self._dropout(encoder)
             last_h.append(self._compute_last_hidden_representation(encoder))
         # Output embedding
@@ -523,9 +524,9 @@ class RNN(Model):
         decoder = tf.transpose(h_dec, [1, 0, 2]) # (T, bs, nb_lat)
         for k in range(self.nb_layers):
             decoder = self.rnn_layer(input_size=self.hidden_size,
-                                       hidden_size=self.hidden_size,
-                                       init=last_h[k],
-                                       dtype=self.dtype)(h_t=decoder)
+                                     hidden_size=self.hidden_size,
+                                     init=last_h[k],
+                                     dtype=self.dtype)(h_t=decoder)
             decoder = self._dropout(decoder)
         decoder = tf.transpose(decoder, [1, 0, 2]) # (bs, T, nb_lat)
         # Output linear transformation layer
@@ -544,6 +545,7 @@ class GRU(RNN):
         super(GRU, self).__init__(
             layers.GRULayer, in_voc, out_voc, hidden_size, drop_p, lr,
             batch_size, nb_epochs, beam_size, nb_layers, dtype, name)
+        self.model_name = "gru"
 
 class LSTM(RNN):
     '''
@@ -555,3 +557,4 @@ class LSTM(RNN):
         super(LSTM, self).__init__(
             layers.LSTMLayer, in_voc, out_voc, hidden_size, drop_p, lr,
             batch_size, nb_epochs, beam_size, nb_layers, dtype, name)
+        self.model_name = "lstm"
