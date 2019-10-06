@@ -1,6 +1,9 @@
 #!/bin/bash
 # Adapted from https://github.com/facebookresearch/MIXER/blob/master/prepareData.sh
 
+echo 'Cloning Moses github repository (for tokenization scripts)...'
+git clone https://github.com/moses-smt/mosesdecoder.git
+
 SCRIPTS=mosesdecoder/scripts
 TOKENIZER=$SCRIPTS/tokenizer/tokenizer.perl
 CLEAN=$SCRIPTS/training/clean-corpus-n.perl
@@ -18,11 +21,6 @@ FILES=(
 CORPORA=(
     "training/europarl-v7.fr-en"
 )
-
-if [ ! -d "$SCRIPTS" ]; then
-    echo "Please set SCRIPTS variable correctly to point to Moses scripts."
-    exit
-fi
 
 src=en
 tgt=fr
