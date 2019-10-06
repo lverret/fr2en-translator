@@ -3,7 +3,6 @@ import tensorflow as tf
 import numpy as np
 from tqdm import tqdm
 import operator
-import nltk # for bleu score
 import layers
 from data import Reader
 
@@ -201,6 +200,7 @@ class Model(object):
         ---------
         valid_data: tuple of pd.Series input and output sentences.
         '''
+        import nltk # for bleu score
         input_valid_sentences, output_valid_sentences = valid_data
         tot_bleu = 0
         nb_valid_sentences = input_valid_sentences.shape[0]
